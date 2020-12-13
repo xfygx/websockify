@@ -456,7 +456,7 @@ class WebSocket(object):
             return len(msg)
 
         try:
-            self._sendmsg(0x2, msg)
+            self._sendmsg(0x1, msg) # kkssyy only supports base64 protocol, so opcode must be text frame.
         except WebSocketWantWriteError:
             self._previous_sendmsg = msg
             raise
@@ -639,9 +639,9 @@ class WebSocket(object):
                     msg = self._partial_msg
                     self._partial_msg = ''.encode("ascii")
                     return msg
-            elif frame["opcode"] == 0x1:
-                self.shutdown(socket.SHUT_RDWR, 1003, "Unsupported: Text frames are not supported")
-            elif frame["opcode"] == 0x2:
+            #elif frame["opcode"] == 0x1:
+            #    self.shutdown(socket.SHUT_RDWR, 1003, "Unsupported: Text frames are not supported")
+            elif frame["opcode"] == 0x2 or frame["opcode"] == 0x1:  # kkssyy: websockify don't support text fram and shutdown socket. Workaround for this limitation. 
                 if self._partial_msg:
                     self.shutdown(socket.SHUT_RDWR, 1002, "Procotol error: Unexpected new frame")
                     continue
